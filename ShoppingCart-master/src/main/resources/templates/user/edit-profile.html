@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<!--
+    Edit Profile Page
+    Logic: Display current user info, allow editing username/avatar/password,
+    optionally add new shipping address, validate all inputs before submission
+-->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - Shopping Cart System</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            background: #f4f5f6;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 40px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 90%;
+            background: #fff;
+            padding: 32px;
+            border-radius: 10px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+            box-sizing: border-box;
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+            color: #333;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        .form-section {
+            margin-top: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+            color: #999;
+            font-size: 12px;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 28px;
+        }
+
+        button, a.button-link {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover, a.button-link:hover {
+            background-color: #0056b3;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #3c3;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .current-info {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .current-info h3 {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            color: #555;
+        }
+
+        .info-row strong {
+            color: #333;
+        }
+
+        .password-section {
+            border-top: 2px solid #e0e0e0;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+
+        .password-section h3 {
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        .field-error {
+            color: #c33;
+            margin-top: 6px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Edit Profile</h1>
+
+    <div class="form-section">
+        <!-- Display current user information for reference -->
+        <div class="current-info">
+            <h3>Current Information</h3>
+            <div class="info-row">
+                <span>User Name：</span>
+                <strong th:text="${userInfo.userName}">-</strong>
+            </div>
+            <div class="info-row">
+                <span>Phone Number：</span>
+                <strong th:text="${userInfo.phoneNumber}">-</strong>
+            </div>
+        </div>
+
+        <!-- Display error/success messages from form submission -->
+        <div th:if="${error}" class="error-message" th:text="${error}"></div>
+        <div th:if="${success}" class="success-message" th:text="${success}"></div>
+
+        <!-- Profile update form: Fields are optional, only update if provided -->
+        <form th:action="@{/user/update}" th:object="${updateRequest}" method="post">
+            <!-- Display global validation errors -->
+            <div th:if="${#fields.hasGlobalErrors()}" class="error-message">
+                <ul>
+                    <li th:each="err : ${#fields.globalErrors()}" th:text="${err}"></li>
+                </ul>
+            </div>
+            <div class="form-group">
+                <label for="userName">New User Name</label>
+                <input type="text"
+                       id="userName"
+                       th:field="*{userName}"
+                       placeholder="Leave blank to not modify the user name"
+                       minlength="2"
+                       maxlength="50">
+                <small>Leave blank to not modify the user name</small>
+                <div class="field-error" th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="avatar">Avatar URL</label>
+                <input type="text"
+                       id="avatar"
+                       th:field="*{avatar}"
+                       placeholder="例如：https://example.com/avatar.jpg">
+                <small>Please enter the complete URL address of the image (e.g. https://i.imgur.com/xxx.jpg), leave blank to not modify</small>
+                <div class="field-error" th:if="${#fields.hasErrors('avatar')}" th:errors="*{avatar}"></div>
+            </div>
+
+            <!-- Password change section: Only processes if both old and new password provided -->
+            <div class="password-section">
+                <h3>Change Password</h3>
+
+                <div class="form-group">
+                    <label for="oldPassword">Original Password</label>
+                    <input type="password"
+                           id="oldPassword"
+                           th:field="*{oldPassword}"
+                           placeholder="Required when changing password">
+                    <small>Only required when changing password</small>
+                    <div class="field-error" th:if="${#fields.hasErrors('oldPassword')}" th:errors="*{oldPassword}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="newPassword">New Password</label>
+                    <input type="password"
+                           id="newPassword"
+                           th:field="*{newPassword}"
+                           placeholder="Leave blank to not modify the password"
+                           minlength="6"
+                           maxlength="20">
+                    <small>Leave blank to not modify the password, length 6-20 characters</small>
+                    <div class="field-error" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}"></div>
+                </div>
+            </div>
+
+            <!-- Address section: Create new address, requires all fields if any field is filled -->
+            <div class="form-section">
+                <h3>Shipping Address (Optional)</h3>
+
+                <div class="form-group">
+                    <label for="receiverName">Receiver Name</label>
+                    <input type="text" id="receiverName" th:field="*{receiverName}" placeholder="For example: Zhang San">
+                    <div class="field-error" th:if="${#fields.hasErrors('receiverName')}" th:errors="*{receiverName}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="phoneAddr">Contact Number</label>
+                    <input type="text" id="phoneAddr" th:field="*{phone}" placeholder="For example:+65 91234567">
+                    <div class="field-error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="region">Province/Municipality/District</label>
+                    <input type="text" id="region" th:field="*{region}" placeholder="For example:Singapore">
+                    <div class="field-error" th:if="${#fields.hasErrors('region')}" th:errors="*{region}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="detailAddress">Detailed Address</label>
+                    <input type="text" id="detailAddress" th:field="*{detailAddress}" placeholder="For example: Unit 101, Building 1, XX Residential Complex">
+                    <div class="field-error" th:if="${#fields.hasErrors('detailAddress')}" th:errors="*{detailAddress}"></div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button type="submit">Save changes</button>
+                <a th:href="@{/user/addresses}" class="button-link" style="margin-right: 10px;">Management Address</a>
+                <a th:href="@{/user/profile}" class="button-link">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

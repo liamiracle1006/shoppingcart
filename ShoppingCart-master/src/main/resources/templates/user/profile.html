@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<!--
+    User Profile Page
+    Logic: Display user information including avatar, username, phone, registration date
+    Provide links to edit profile, view products, and logout
+-->
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Information - Shopping Cart System</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            background: #f4f5f6;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 40px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 90%;
+            background: #fff;
+            padding: 32px;
+            border-radius: 10px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+            box-sizing: border-box;
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        th, td {
+            border: 1px solid #e0e0e0;
+            padding: 10px;
+            text-align: center;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        .form-section {
+            margin-top: 24px;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 28px;
+        }
+
+        button, a.button-link {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover, a.button-link:hover {
+            background-color: #0056b3;
+        }
+
+        .avatar-section {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #007bff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 40px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .info-value {
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Personal Center</h1>
+
+    <!-- Avatar section: Display user avatar or first letter of username as fallback -->
+    <div class="avatar-section">
+        <div th:if="${userInfo.avatar == null or #strings.isEmpty(userInfo.avatar)}">
+            <!-- Default avatar: Show first letter of username -->
+            <div class="avatar">
+                <span th:text="${#strings.substring(userInfo.userName, 0, 1)}">U</span>
+            </div>
+        </div>
+        <div th:if="${userInfo.avatar != null and !#strings.isEmpty(userInfo.avatar)}">
+            <!-- Custom avatar: Show image with fallback to default if image fails -->
+            <img th:src="${userInfo.avatar}"
+                 alt="Avatar"
+                 style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="avatar" style="display: none;">
+                <span th:text="${#strings.substring(userInfo.userName, 0, 1)}">U</span>
+            </div>
+        </div>
+        <h3 th:text="${userInfo.userName}">Username</h3>
+    </div>
+
+    <!-- User information display: Show all user details -->
+    <div class="form-section">
+        <div class="info-item">
+            <span class="info-label">User ID:</span>
+            <span class="info-value" th:text="${userInfo.userId}">-</span>
+        </div>
+
+        <div class="info-item">
+            <span class="info-label">Username:</span>
+            <span class="info-value" th:text="${userInfo.userName}">-</span>
+        </div>
+
+        <div class="info-item">
+            <span class="info-label">phone number:</span>
+            <span class="info-value" th:text="${userInfo.phoneNumber}">-</span>
+        </div>
+
+        <div class="info-item">
+            <span class="info-label">Registration Date:</span>
+            <span class="info-value" th:text="${#temporals.format(userInfo.createTime, 'yyyy-MM-dd HH:mm:ss')}">-</span>
+        </div>
+    </div>
+
+    <!-- Action buttons: Edit profile, view products, or logout -->
+    <div class="button-group">
+        <a th:href="@{/user/edit}" class="button-link">Edit Information</a>
+        <a th:href="@{/products/lists}" class="button-link">Return to Product List</a>
+        <a th:href="@{/logout}" class="button-link">Log Out</a>
+    </div>
+</div>
+</body>
+</html>
